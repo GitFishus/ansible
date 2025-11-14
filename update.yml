@@ -1,0 +1,10 @@
+---
+- name: Update all RHEL boxes
+  hosts: all
+  become: true
+
+  tasks:
+  - name: perform the update
+    ansible.builtin.dnf:
+      name: "*"
+      state: latest
