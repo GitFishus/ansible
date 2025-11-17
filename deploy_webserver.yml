@@ -21,7 +21,7 @@
        - php-mysqlnd
        - php-cli
        - git
-       - python3-firewall
+       - firewalld
     
     - name: Configure firewall for access
       ansible.posix.firewalld:
