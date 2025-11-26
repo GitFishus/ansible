@@ -96,7 +96,7 @@ Having job templates (automation building blocks) we create two workflows:
    3. deploy_webserver
    4. deploy_website
 2. A workflow (name suggestion: "Deploy Full Web App") that run the following in that specific oprder:
-   1. deploy_servers
+   1. deploy_servers (which applies the terraform plan from HashiCorp Terraform Cloud)
    3. the previously created workflow
 
 ### API Token
