@@ -10,10 +10,11 @@ This seperation of concerns means HCP Terraform has all the credentials needed t
 So what are the basics we have set up for you:
 1. AAP has the notion of _Organizations_. For this workshop an Organization named `TechXchangeNL` has been made and you will work within that organization.
 2. A _Machine Credential_ named `RHEL`. You use this machine credential to be able to run your playbooks on the provisioned servers. HCP Terraform deploys the keys inside this credential to the cloud.
-3. A _Custom Credential Type_ called `Hashicorp Terraform Cloud`. You will use this later to create your own credential of this type. See [here](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/getting_started_with_hashicorp_and_ansible_automation_platform/terraform-product#creating-custom-credential-type) for details.
-4. An _Inventory_ called `local` with the host `localhost` for api based automations. Playbooks that use an api for their work typically use localhost.
-5. A _token_ to be able to do stuff in Hashicorp Terraform Cloud. This token is available as a var in HCP Terraform.
-6. An _Execution Environment_ called `ee-tech-x-change-nl` in AAP that provides all the collections and dependencies you need in this workshop. For Terraform there are currently 2 certified ansible collections:
+3. An _Amazon Web Services Credential_ named `AWS`. You will use this to configure inventory syncing with AWS. 
+4. A _Custom Credential Type_ called `Hashicorp Terraform Cloud`. You will use this later to create your own credential of this type. See [here](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/getting_started_with_hashicorp_and_ansible_automation_platform/terraform-product#creating-custom-credential-type) for details.
+5. An _Inventory_ called `local` with the host `localhost` for api based automations. Playbooks that use an api for their work typically use localhost.
+6. A _token_ to be able to do stuff in Hashicorp Terraform Cloud. This token is available as a var in HCP Terraform.
+7. An _Execution Environment_ called `ee-tech-x-change-nl` in AAP that provides all the collections and dependencies you need in this workshop. For Terraform there are currently 2 certified ansible collections:
   - [cloud.terraform](https://caap.fvz.ansible-labs.de/content/collections/published/cloud/terraform/documentation/) - Maintained by Red Hat. It uses the terraform cli to talk to terraform.
   - [hashicorp.terraform](https://caap.fvz.ansible-labs.de/content/collections/published/hashicorp/terraform/documentation/) - Maintained by HashiCorp
   > All future development is on the hashicorp.terraform collection. It is the collection for integration with HashiCorp Terraform Enterprise and Cloud and it is based on the provided API. This workshop uses this collection where possible and falls back to the older cloud.terraform collection where needed. 
@@ -55,7 +56,12 @@ Apart from the already available machine credential, you need a few more..
 > You need to have a Terraform token for both credentials. You find this in HCP Terraform under Projects -> defualt project -> settings -> variable sets -> AAP -> TERRAFORM_TOKEN. For workspace enter the workspace you made in Terraform as part of the prep work you need to do in HCP Terraform
 
 ### Inventories
-Create an inventory called "TechXchangeNL" and add a dynamic inventory source to it named "Terraform". This source is of type `Terraform State` and needs some configuration to do the magic of syncing the statefile. Use the provided execution environment `ee-tech-x-change-nl` and the credential you made for it. The config that you need to give in the `Source Variables` is:
+Inventories are either _pushed_ by HCP Terraform or _pulled_ by AAP using Dynamic Inventory Plugins. When pushed, they are fully maintained by HCP Terraform. With the Dynamic Inventory Plugins AAP is in control. For this workshop AAP can _pull_ the hosts either from HCP or from the Cloud where HCP deploys to. We will configure both into the same Inventory so we can try both.
+
+Create an inventory called `TechXchangeNL`. In this inventory create two sources:
+
+#### Dynamic Inventory Source for Terraform State
+Create a Dynamic inventory source in the inventory `TechXchangeNL` named `Terraform`". This source is of type `Terraform State` and needs some configuration to do the magic of syncing the statefile. Use the provided execution environment `ee-tech-x-change-nl`. The config that you need to give in the `Source Variables` is:
 ```text
 plugin: cloud.terraform.terraform_state
 backend_type: remote
@@ -67,12 +73,25 @@ keyed_groups:
   - prefix: role
     key: tags.Role
 ```
-  What does this do:
+  So what does this do:
   - `compose` will use the value of the key `public_ip` received from HCP Terraform to create a key ansible_host with the same value. `ansible_host` is used by jobs to connect to the host.
   - `hostnames` is used to use the value of the tag `Name` as received from HCP Terraform to give the host its name.
   - `keyed_groups` is used to make inventory groups from tag values as received from HCP Terraform. So here a group will be created with prefix role and the value from tag Role as received from HPC. So: `role_<tagvalue>`. The host will be placed in this group.
 
 Also, you need the `Terraform Backend Configuration` Credential you made before as the credential for this source. You can test it by syncing the source manually.
+Do **NOT** enable _update on launch_.
+
+#### Dynanic Inventory Source for AWS
+Create a Dynamic inventory source in the inventory `TechXchangeNL` named `AWS`". This source is of type `Amazon EC2` and needs some configuration to do the magic. Use the provided execution environment `ee-tech-x-change-nl`. The config that you need to give in the `Source Variables` is:
+```text
+keyed_groups:
+  - prefix: role
+    key: tags.Role
+```
+  So what does this do:
+  - `keyed_groups` is used to make inventory groups from tag values as received from AWS EC2. So here a group will be created with prefix role and the value from tag Role as received from AWS. So: `role_<tagvalue>`. The hosts will be placed in this group.
+
+Also, you need the `AWS` Credential you were provided as the credential for this source. You can test it by syncing the source manually.
 Do **NOT** enable _update on launch_.
 
 
