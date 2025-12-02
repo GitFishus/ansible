@@ -23,8 +23,7 @@ This workshop has been designed such that **you** will need to do most of the wo
 
 - Where is the Ansible Automation Server? -> [here](https://caap.fvz.ansible-labs.de)
 - What is my username? -> It is the email address you gave us when you signed up for this workshop
-- What is my password? -> It's on the whiteboard in the workshop room (after you log in you can change your password if you want)
-
+- What is my password? -> You can find it as a stored variable in HCP Terraform under `Default Project -> Settings -> Variable Sets` with a key of `AAP_UI_PASSWORD`
 
 
 ## Controller Building Blocks
