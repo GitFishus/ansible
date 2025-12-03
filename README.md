@@ -1,7 +1,7 @@
 # Welcome to the Ansible part of the workshop
 
 ## The basics
-The division of work between HCP and AAP (as likely already explained to you) is:
+The division of work between HCP and AAP is:
 - HCP Terraform: Building up and changing infrastructure in the cloud, among which are RHEL10 servers
 - AAP: Configure the servers to become a webserver serving a website
 
