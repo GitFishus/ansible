@@ -1,5 +1,22 @@
-- name: HCP
+- name: Run Terraform Apply via HCP Terraform
   hosts: all
-  tasks:
-  - name: Apply a terraform plan
+  gather_facts: false
 
+  collections:
+    - hashicorp.terraform
+
+  tasks:
+    - name: Apply Terraform plan
+      hashicorp.terraform.run:
+        organization: "TechXchangeNL"
+        workspace: "Terraform_Lama"
+        run_apply: true
+        poll: true
+        interval: 5
+        timeout: 1200
+        tf_timeout: 6000
+      register: tf_output
+
+    - name: Show output
+      debug:
+        var: tf_output
