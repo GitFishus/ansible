@@ -10,11 +10,12 @@
       hashicorp.terraform.run:
         organization: "TechXchangeNL"
         workspace: "Terraform_Lama"
-        run_apply: true
+        auto_apply: true
         poll: true
-        interval: 5
-        timeout: 1200
+        poll_interval: 5
+        poll_timeout: 1200
         tf_timeout: 6000
+        tf_token: "{{ terraform_token }}"
       register: tf_output
 
     - name: Show output
